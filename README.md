@@ -1,4 +1,4 @@
-### TaskForge
+# TaskForge
 Lightweight Distributed Job Scheduling Platform
 
 
@@ -18,7 +18,9 @@ Metrics loggings
 ## How to Run:
 $> docker compose up --build
 
-- visit http://localhost:8000/docs
+- visit http://localhost:8000/docs -> for Swagger UI
+- visit http://localhost:8000 -> for verifying successful message
+- visit http://localhost:8000/health -> for health of API
 
 
 ## Requirements file:
