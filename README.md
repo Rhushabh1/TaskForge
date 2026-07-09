@@ -28,6 +28,4 @@ $> pip freeze > requirements.txt
 $> pip install -r requirements.txt
 
 ## TODO:
-- Every folder should respond to a system design concept
-- design basic HLD flow
-- features selection of APIs, scheduler, worker, retry, job status flow, cache 
+- execution engine, strategy - for 3 different kinds of jobs
