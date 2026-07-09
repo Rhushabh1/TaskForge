@@ -27,6 +27,9 @@ class Job(Base):
 	status = Column(SqlEnum(JobStatus),
 					default = JobStatus.PENDING,
 					nullable = False)
+	job_type = Column(String,
+						nullable = False,
+						default = "shell")
 	# will add retry later
 	retry_count = Column(Integer, default = 0)
 	created_at = Column(DateTime, default = datetime.utcnow)

@@ -22,10 +22,15 @@ $> docker compose up --build
 - visit http://localhost:8000 -> for verifying successful message
 - visit http://localhost:8000/health -> for health of API
 
+for inspecting TaskForge DB
+$>  docker exec -it taskforge-db psql -U TaskForge -d TaskForge
 
 ## Requirements file:
 $> pip freeze > requirements.txt
 $> pip install -r requirements.txt
 
 ## TODO:
-- execution engine, strategy - for 3 different kinds of jobs
+- add Scheduler
+- add Kafka
+- add Workers
+- add Retries
