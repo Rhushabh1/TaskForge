@@ -1,5 +1,6 @@
 # for error handling too
 from fastapi import APIRouter, Depends, HTTPException
+from datetime import datetime
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.job import Job
@@ -15,12 +16,15 @@ router = APIRouter(prefix = "/jobs", tags = ["Jobs"])
 # depends on successful db session
 @router.post("/", response_model = JobResponse)
 def create_job(request: JobCreate, db: Session = Depends(get_db)):
+	print("API enters", datetime.utcnow())
 	repo = JobRepository(db)
 	job = Job(name = request.name,
 				command = request.command,
 				job_type = request.job_type,
 				schedule_time = request.schedule_time)
-	return repo.create(job)
+	job = repo.create(job)
+	print("after create API", datetime.utcnow())
+	return job
 
 
 # returning list of Jobs

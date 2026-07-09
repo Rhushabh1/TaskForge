@@ -25,12 +25,33 @@ $> docker compose up --build
 for inspecting TaskForge DB
 $>  docker exec -it taskforge-db psql -U TaskForge -d TaskForge
 
+## Docker build issue
+when the docker build fails after "docker compose up --build"
+- close Docker Desktop
+$> taskkill /F /IM "Docker Desktop.exe"
+$> taskkill /F /IM "com.docker.backend.exe"
+$> Remove-Item "$env:USERPROFILE\.docker\buildx" -Recurse -Force
+- restart Docker Desktop
+$> docker buildx ls
+$> $env:DOCKER_BUILDKIT=0
+$> $env:COMPOSE_DOCKER_CLI_BUILD=0
+$> docker compose build
+$> docker compose up --build
+
 ## Requirements file:
 $> pip freeze > requirements.txt
 $> pip install -r requirements.txt
 
+## Scheduler Logic
+it just dispatches jobs, doesn't execute anything
+thats the work of the worker
+- select jobs where status = pending & time <= current time
+- publish to kafka
+- status = queued
+
 ## TODO:
-- add Scheduler
+- solve duplicate scheduler dispatch bug with each API instance -> add locks when one scheduler is dispatching jobs (classic race condition in distributed scheduler system)
+- remove polling scheduler -> move to redis, kafka, listen/notify, zookeeper
 - add Kafka
 - add Workers
 - add Retries
