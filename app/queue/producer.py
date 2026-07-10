@@ -1,5 +1,6 @@
 from app.queue.kafka import producer
 from app.queue.topics import JOB_EXECUTE
+import uuid
 
 
 class JobProducer:
