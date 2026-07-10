@@ -50,8 +50,8 @@ thats the work of the worker
 - status = queued
 
 ## TODO:
-- solve duplicate scheduler dispatch bug with each API instance -> add locks when one scheduler is dispatching jobs (classic race condition in distributed scheduler system)
-- remove polling scheduler -> move to redis, kafka, listen/notify, zookeeper
-- add Kafka
-- add Workers
+- remove polling scheduler
+- add Workers + concurrent execution
+- add job lifecycle updates -> QUEUED -> RUNNING -> SUCCESS/FAILED
+- add job status kafka topic
 - add Retries
