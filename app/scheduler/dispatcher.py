@@ -8,3 +8,4 @@ class Dispatcher:
 	def dispatch(job):
 		print(f"Dispatching job {job.id}")
 		JobProducer.publish(job)
+		print("dispatched")

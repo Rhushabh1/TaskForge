@@ -53,4 +53,13 @@ class JobRepository:
 		self.db.commit()
 		return jobs
 
+	# for updating status in app/queue/status_consumer.py
+	def update_status(self, job_id, status):
+		print("updating job status: ", job_id, status)
+		job = self.get(job_id)
+		if job:
+			job.status = status
+			self.db.commit()
+			print("db changes committed")
+
 

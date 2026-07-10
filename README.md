@@ -18,6 +18,13 @@ Metrics loggings
 ## How to Run:
 $> docker compose up --build
 
+- for running worker kafka consumer
+$> docker compose exec api python -m app.worker.worker
+
+- for running status-logger kafka consumer
+$> docker compose exec api python -m app.queue.status_consumer
+
+
 - visit http://localhost:8000/docs -> for Swagger UI
 - visit http://localhost:8000 -> for verifying successful message
 - visit http://localhost:8000/health -> for health of API
@@ -50,8 +57,9 @@ thats the work of the worker
 - status = queued
 
 ## TODO:
+- forever RUNNING if the executor crashes midway -> no SUCCESS/FAILED -> better to add worker heartbeats so that it FAILED if heartbeat timeout
+- if all worker threads are busy, then remaining jobs sit in memory -> so pause kafka polling until threadpool has free workers (backpressure -> pausing polling upstream to avoid memory overload downstream)
 - remove polling scheduler
-- add Workers + concurrent execution
-- add job lifecycle updates -> QUEUED -> RUNNING -> SUCCESS/FAILED
-- add job status kafka topic
-- add Retries
+- add Retries + exponential backoff
+- DLQ - dead letter queue
+- tracking execution history -> for metrics/analytics
