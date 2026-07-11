@@ -11,8 +11,7 @@ class JobStatus(str, Enum):
 	RUNNING = "RUNNING"
 	SUCCESS = "SUCCESS"
 	FAILED = "FAILED"
-	CANCELLED = "CANCELLED"
-	# no retries for now (just basic CRUD)
+	DLQ = "DLQ"
 
 
 # model for how a Job object structure looks like
@@ -31,9 +30,17 @@ class Job(Base):
 						nullable = False,
 						default = "shell")
 	# will add retry later
-	retry_count = Column(Integer, default = 0)
-	created_at = Column(DateTime, default = datetime.utcnow)
+	max_retries = Column(Integer,
+						default = 3,
+						nullable = False)
+	retry_count = Column(Integer, 
+						default = 0,
+						nullable = False)
+	# for exponential backoff
+	next_retry_at = Column(DateTime, nullable = True)
+	last_error = Column(String, nullable = True)
 	# setting up automatic update	
+	created_at = Column(DateTime, default = datetime.utcnow)
 	updated_at = Column(DateTime, 
 						default = datetime.utcnow,
 						onupdate = datetime.utcnow)

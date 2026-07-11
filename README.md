@@ -24,10 +24,12 @@ $> docker compose exec api python -m app.worker.worker
 - for running status-logger kafka consumer
 $> docker compose exec api python -m app.queue.status_consumer
 
-
 - visit http://localhost:8000/docs -> for Swagger UI
 - visit http://localhost:8000 -> for verifying successful message
 - visit http://localhost:8000/health -> for health of API
+
+- to shutdown everything
+$> docker compose down -v
 
 for inspecting TaskForge DB
 $>  docker exec -it taskforge-db psql -U TaskForge -d TaskForge
@@ -57,9 +59,10 @@ thats the work of the worker
 - status = queued
 
 ## TODO:
-- forever RUNNING if the executor crashes midway -> no SUCCESS/FAILED -> better to add worker heartbeats so that it FAILED if heartbeat timeout
+- orphaned jobs = forever RUNNING if the executor crashes midway -> no SUCCESS/FAILED -> better to add worker heartbeats so that it FAILED if heartbeat timeout
 - if all worker threads are busy, then remaining jobs sit in memory -> so pause kafka polling until threadpool has free workers (backpressure -> pausing polling upstream to avoid memory overload downstream)
 - remove polling scheduler
-- add Retries + exponential backoff
 - DLQ - dead letter queue
 - tracking execution history -> for metrics/analytics
+- separate DB commits from repositories and let JobService/UnitOfWork handle it -> rollbacks become easier and there is no inconsistent DB
+- only one leader scheduler should dispatch jobs at a time

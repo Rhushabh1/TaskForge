@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from app.models.job import Job, JobStatus
 from datetime import datetime
 
@@ -42,8 +43,10 @@ class JobRepository:
 		# locking the rows to avoid duplicate 
 		jobs = (
 				self.db.query(Job)
-				.filter(Job.status == JobStatus.PENDING, 
-					Job.schedule_time <= datetime.utcnow())
+				.filter(Job.status == JobStatus.PENDING,
+					or_(Job.schedule_time <= datetime.utcnow(),
+						Job.next_retry_at <= datetime.utcnow()) 
+					)
 				.with_for_update(skip_locked = True)
 				.limit(limit)
 				.all()

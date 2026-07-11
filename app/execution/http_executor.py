@@ -6,6 +6,6 @@ class HttpExecutor(BaseExecutor):
 	def execute(self, url: str):
 		response = requests.get(url)
 		return {
-			"status": response.status_code,
-			"body": response.text
+			"return_code": response.status_code,
+			"stdout": response.text
 		}

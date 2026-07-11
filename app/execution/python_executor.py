@@ -10,5 +10,5 @@ class PythonExecutor(BaseExecutor):
 		return {
 			"stdout": process.stdout,
 			"stderr": process.stderr,
-			"returncode": process.returncode
+			"return_code": process.returncode
 		}

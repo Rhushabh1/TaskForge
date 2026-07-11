@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.api.health import router as health_router
 from app.api.jobs import router as job_router
 from app.db.database import Base, engine
+import app.models
 from app.scheduler.scheduler import Scheduler
 # since scheduler starts before fastapi startup finishes
 from contextlib import asynccontextmanager
