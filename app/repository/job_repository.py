@@ -1,7 +1,8 @@
+from datetime import datetime
+from app.models.job import Job, JobStatus
+from app.repository.base_repository import BaseRepository
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from app.models.job import Job, JobStatus
-from datetime import datetime
 
 
 class JobRepository:
@@ -10,13 +11,9 @@ class JobRepository:
 
 	# create a new job with given Job object
 	def create(self, job: Job):
-		print("creating job", datetime.utcnow())
 		self.db.add(job)
-		print("before commit", datetime.utcnow())
 		self.db.commit()
-		print("after commit", datetime.utcnow())
 		self.db.refresh(job)
-		print("id", job.id, datetime.utcnow())
 		return job
 
 	# fetch job for job_id
@@ -24,7 +21,7 @@ class JobRepository:
 		return self.db.query(Job).filter(Job.id == job_id).first()
 
 	# fetch all jobs from the db
-	def list(self):
+	def get_all(self):
 		return self.db.query(Job).all()
 
 	def delete(self, job_id: int):
@@ -64,5 +61,21 @@ class JobRepository:
 			job.status = status
 			self.db.commit()
 			print("db changes committed")
+
+	def get_pending(self):
+		return (self.db.query(Job)
+				.filter(Job.status == JobStatus.PENDING, 
+						Job.schedule_time <= datetime.utcnow())
+				.all())
+
+	def get_running(self):
+		return (self.db.query(Job)
+				.filter(Job.status == JobStatus.RUNNING)
+				.all())
+
+	def get_failed(self):
+		return (self.db.query(Job)
+				.filter(JobStatus == JobStatus.FAILED)
+				.all())
 
 

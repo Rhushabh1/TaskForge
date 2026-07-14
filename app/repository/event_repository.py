@@ -19,3 +19,16 @@ class EventRepository:
 		self.db.add(event)
 		self.db.commit()
 		self.db.refresh(event)
+
+	def latest(self, limit = 100):
+		return (self.db.query(ProcessedEvent)
+				.order_by(ProcessedEvent.processed_at.desc())
+				.limit(limit)
+				.all())
+
+	def exists(self, event_id):
+		return (self.db.query(ProcessedEvent)
+				.fitler(ProcessedEvent.id == event_id)
+				.first())
+
+		

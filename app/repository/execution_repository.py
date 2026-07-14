@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.execution import Execution
+from app.models.job import JobStatus
 from datetime import datetime
 
 
@@ -9,13 +10,9 @@ class ExecutionRepository:
 
 	# create a new entry with given Execution object
 	def create(self, execution: Execution):
-		print("creating execution", datetime.utcnow())
 		self.db.add(execution)
-		print("before commit", datetime.utcnow())
 		self.db.commit()
-		print("after commit", datetime.utcnow())
 		self.db.refresh(execution)
-		print("id", execution.id, datetime.utcnow())
 		return execution
 
 	# fetch execution for exec_id
@@ -23,17 +20,17 @@ class ExecutionRepository:
 		return self.db.query(Execution).filter(Execution.id == exec_id).first()
 
 	# fetch all executions from the db
-	def list(self):
-		return self.db.query(Execution).all()
+	def latest(self, limit = 50):
+		return (self.db.query(Execution)
+				.order_by(Execution.started_at.desc())
+				.limit(limit)
+				.all())
 
-	# likely never used
-	def delete(self, exec_id: int):
-		execution = self.get(exec_id)
-		if execution is None:
-			# exec_id not found
-			return False
-		self.db.delete(execution)
-		self.db.commit()
-		return True
+	def failed(self, limit = 20):
+		return (self.db.query(Execution)
+				.filter(Execution.status == JobStatus.FAILED)
+				.order_by(Execution.started_at.desc())
+				.limit(limit)
+				.all())
 
 
