@@ -4,3 +4,5 @@ from app.db.database import Base
 from app.models.job import Job
 from app.models.execution import Execution
 from app.models.dlq import DLQJob
+from app.models.worker import Worker
+from app.models.event import ProcessedEvent

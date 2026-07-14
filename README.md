@@ -59,10 +59,8 @@ thats the work of the worker
 - status = queued
 
 ## TODO:
-- orphaned jobs = forever RUNNING if the executor crashes midway -> no SUCCESS/FAILED -> better to add worker heartbeats so that it FAILED if heartbeat timeout
 - if all worker threads are busy, then remaining jobs sit in memory -> so pause kafka polling until threadpool has free workers (backpressure -> pausing polling upstream to avoid memory overload downstream)
 - remove polling scheduler
-- DLQ - dead letter queue
 - tracking execution history -> for metrics/analytics
 - separate DB commits from repositories and let JobService/UnitOfWork handle it -> rollbacks become easier and there is no inconsistent DB
 - only one leader scheduler should dispatch jobs at a time

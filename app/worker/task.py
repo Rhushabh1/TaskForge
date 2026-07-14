@@ -1,6 +1,7 @@
 from datetime import datetime
 from app.db.database import SessionLocal
 from app.models.execution import Execution
+from app.repository.event_repository import EventRepository
 from app.repository.execution_repository import ExecutionRepository
 
 from app.execution.factory import ExecutorFactory
@@ -14,6 +15,10 @@ def execute_job(message):
 	# connect to execution db
 	db = SessionLocal()
 	exec_repo = ExecutionRepository(db)
+	event_repo = EventRepository(db)
+	# to check for duplicate event_ids
+	if event_repo.already_processed(message["event_id"]):
+		return 
 	# alert that job is now running
 	StatusPublisher.publish(message["job_id"], JobStatus.RUNNING)
 	start_time = datetime.utcnow()
@@ -47,4 +52,5 @@ def execute_job(message):
 		exec_repo.create(execution)
 		StatusPublisher.publish(message["job_id"], JobStatus.FAILED, str(e))
 	finally:
+		event_repo.save_event(message["event_id"])
 		db.close()

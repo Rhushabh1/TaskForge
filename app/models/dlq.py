@@ -5,7 +5,7 @@ from app.db.database import Base
 
 # never overwrite history of executions
 class DLQJob(Base):
-	__tablename__ = "dead_letter_queue_jobs"
+	__tablename__ = "dead_letter_jobs"
 	id = Column(Integer, 
 				primary_key = True, 
 				index = True)
