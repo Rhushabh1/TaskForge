@@ -78,4 +78,24 @@ class JobRepository:
 				.filter(JobStatus == JobStatus.FAILED)
 				.all())
 
+	def recover_jobs(self, worker_id):
+		jobs = (self.db.query(Job)
+				.filter(Job.worker_id == worker_id,
+						Job.status == JobStatus.RUNNING)
+				.all())
+
+		for job in jobs:
+			job.status = JobStatus.PENDING 
+			job.worker_id = None
+			job.next_retry_at = datetime.utcnow()
+			job.retry_count += 1
+		
+		self.db.commit()
+		return jobs
+
+	def assign_worker(self, job, worker):
+		job.worker_id = worker.id 
+		job.status = JobStatus.RUNNING 
+		self.db.commit()
+
 

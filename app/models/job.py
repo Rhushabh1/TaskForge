@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from sqlalchemy import Column, Integer, String, DateTime, Enum as SqlEnum
+from sqlalchemy import Column, Integer, String, DateTime, Enum as SqlEnum, ForeignKey
 from app.db.database import Base
 
 
@@ -29,6 +29,10 @@ class Job(Base):
 	job_type = Column(String,
 						nullable = False,
 						default = "shell")
+	worker_id = Column(Integer,
+						ForeignKey("workers.id"),
+						nullable = True,
+						default = None)
 	# will add retry later
 	max_retries = Column(Integer,
 						default = 3,

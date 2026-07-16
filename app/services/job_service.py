@@ -21,6 +21,7 @@ class JobService:
 			return
 
 		job.status = event["status"]
+		job.worker_id = event["worker_id"]
 		if job.status == JobStatus.SUCCESS:
 			job.last_error = None
 			job.completed_at = datetime.utcnow()

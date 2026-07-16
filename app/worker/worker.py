@@ -10,19 +10,26 @@ from concurrent.futures import ThreadPoolExecutor
 from app.queue.kafka import create_consumer
 from app.queue.topics import JOB_EXECUTE
 from app.worker.task import execute_job
-from app.worker.heartbeat import HeartbeatService
+from app.repository.worker import WorkerRepository
 
 
 HEARTBEAT_CHECK = 10
 MAX_WORKERS = 4
 # register each worker container as distinct + easily scalable for multiple workers
 WORKER_NAME = f"{socket.gethostname()}-{uuid.uuid4().hex[:6]}"
+WORKER_ID = None
 executor = ThreadPoolExecutor(max_workers = MAX_WORKERS)
 
 
 def heartbeat_loop():
 	while True:
-		HeartbeatService.send(WORKER_NAME)
+		# HeartbeatService.send(WORKER_NAME)
+		db = SessionLocal()
+		try:
+			worker = WorkerRepository(db).heartbeat(WORKER_NAME)
+			WORKER_ID = worker.id
+		finally:
+			db.close()
 		time.sleep(HEARTBEAT_CHECK)
 
 
@@ -43,7 +50,7 @@ def start():
 		# each kafka message becomes one thread (max 4)
 		# runs execute_job(message.value)
 		print(f"received: {message.value}")
-		executor.submit(execute_job, message.value)
+		executor.submit(execute_job, message.value, WORKER_ID)
 
 
 if __name__ == "__main__":

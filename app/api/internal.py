@@ -9,7 +9,8 @@ from app.repository.job_repository import JobRepository
 from app.repository.execution_repository import ExecutionRepository 
 from app.repository.worker_repository import WorkerRepository 
 from app.repository.event_repository import EventRepository 
-from app.repository.dlq_repository import DLQRepository 
+from app.repository.dlq_repository import DLQRepository
+from app.repository.scheduler_lock_repository import SchedulerLockRepository  
 
 from app.queue.admin import list_topics
 from app.monitoring.metrics import Metrics
@@ -22,6 +23,7 @@ worker_repo = WorkerRepository(db)
 exec_repo = ExecutionRepository(db)
 dlq_repo = DLQRepository(db)
 event_repo = EventRepository(db)
+lock_repo = SchedulerLockRepository(db)
 
 
 @router.get("/workers")
@@ -71,7 +73,8 @@ def kafka_topics():
 
 @router.get("/scheduler")
 def scheduler():
-	return {"jobs_dispatched": Metrics.scheduler_dispatches}
+	return {"jobs_dispatched": Metrics.scheduler_dispatches,
+			"leader": lock_repo.leader()}
 
 
 @router.get("/worker-stats")

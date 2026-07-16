@@ -3,24 +3,27 @@ from app.db.database import SessionLocal
 from app.models.execution import Execution
 from app.repository.event_repository import EventRepository
 from app.repository.execution_repository import ExecutionRepository
+from app.repository.worker_repository import WorkerRepository
 
 from app.execution.factory import ExecutorFactory
 from app.worker.status_publisher import StatusPublisher
 from app.models.job import JobStatus
 
 
-def execute_job(message):
+def execute_job(message, worker_id):
 	print("executing jobs: ", message)
 
 	# connect to execution db
 	db = SessionLocal()
 	exec_repo = ExecutionRepository(db)
 	event_repo = EventRepository(db)
+	worker_repo = WorkerRepository(db)
+	
 	# to check for duplicate event_ids
 	if event_repo.already_processed(message["event_id"]):
 		return 
 	# alert that job is now running
-	StatusPublisher.publish(message["job_id"], JobStatus.RUNNING)
+	StatusPublisher.publish(message["job_id"], JobStatus.RUNNING, worker_id)
 	start_time = datetime.utcnow()
 	
 	try:
@@ -37,7 +40,7 @@ def execute_job(message):
 							return_code = result.get("return_code", 0))
 		exec_repo.create(execution)
 		# no need to pass result to publisher -> result is not updated in Job table
-		StatusPublisher.publish(message["job_id"], JobStatus.SUCCESS)
+		StatusPublisher.publish(message["job_id"], JobStatus.SUCCESS, worker_id)
 	except Exception as e:
 		print("worker error: ", str(e))
 		# update Execution table
@@ -50,7 +53,7 @@ def execute_job(message):
 							error = str(e),
 							return_code = 1)
 		exec_repo.create(execution)
-		StatusPublisher.publish(message["job_id"], JobStatus.FAILED, str(e))
+		StatusPublisher.publish(message["job_id"], JobStatus.FAILED, worker_id, str(e))
 	finally:
 		event_repo.save_event(message["event_id"])
 		db.close()

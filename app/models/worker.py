@@ -20,9 +20,11 @@ class Worker(Base):
 						unique = True, 
 						nullable = False)
 	status = Column(SqlEnum(WorkerStatus),
-					default = WorkerStatus.OFFLINE,
+					default = WorkerStatus.ONLINE,
 					nullable = False)
 	# same as last seen
-	last_heartbeat = Column(DateTime, default = datetime.utcnow)
-	# foreign key of job_id
-	running_jobs = Column(Integer)
+	last_heartbeat = Column(DateTime, 
+							default = datetime.utcnow,
+							nullable = False)
+	# # foreign key of job_id (TODO)
+	# running_jobs = Column(Integer)

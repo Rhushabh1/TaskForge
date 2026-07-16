@@ -17,7 +17,6 @@ for message in consumer:
 	try:
 		event = message.value
 		print("job event: ", event)
-		service = JobService(db)
-		service.handle_execution(event)
+		JobService(db).handle_execution(event)
 	finally:
 		db.close()

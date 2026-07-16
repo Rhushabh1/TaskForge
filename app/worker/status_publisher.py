@@ -5,7 +5,7 @@ import uuid
 
 class StatusPublisher:
 	@staticmethod
-	def publish(job_id, status, output = None):
+	def publish(job_id, status, worker_id, output = None):
 		producer = get_producer()
 		print(f"publishing to kafka: JOB_STATUS")
 		producer.send(JOB_STATUS,
@@ -13,7 +13,8 @@ class StatusPublisher:
 							"event_id": str(uuid.uuid4()),
 							"job_id": job_id,
 							"status": status,
-							"output": output
+							"output": output,
+							"worker_id": worker_id
 						}
 					)
 		producer.flush()
