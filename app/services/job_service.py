@@ -4,6 +4,8 @@ from app.models.dlq import DLQJob
 from app.repository.job_repository import JobRepository 
 from app.repository.dlq_repository import DLQRepository 
 from app.retry.service import RetryService
+from app.monitoring.metrics import Metrics
+from app.logging.logger import logger
 
 
 # modelled around UnitOfWork -> all DBs should be updated at once via service layer only
@@ -33,5 +35,8 @@ class JobService:
 							failed_at = datetime.utcnow(),
 							reason = event["output"])
 				self.dlq_repo.create(dlq)
-				print("created dlq entry", datetime.utcnow())
+				Metrics.increment("dead_letter_jobs")
+				logger.info("created dlq entry", datetime.utcnow())
+			else:
+				Metrics.increment("retries")
 		self.db.commit()

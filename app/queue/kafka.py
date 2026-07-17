@@ -1,6 +1,7 @@
 from kafka import KafkaProducer, KafkaConsumer
 import json
 import time
+from app.logging.logger import logger
 
 
 _producer = None
@@ -12,13 +13,13 @@ def get_producer():
 
 	while True:
 		try:
-			print("connecting to kafka")
+			logger.info("connecting to kafka")
 			_producer = KafkaProducer(bootstrap_servers = "kafka:9092",
 						value_serializer = lambda v: json.dumps(v).encode())
-			print("connected to kafka")
+			logger.info("connected to kafka")
 			return _producer
 		except Exception as e:
-			print(f"kafka not ready: {e}")
+			logger.error(f"kafka not ready: {e}")
 			time.sleep(5)
 
 
@@ -32,5 +33,5 @@ def create_consumer(topic):
 								enable_auto_commit = True,
 								group_id = "TaskForge")
 		except Exception as e:
-			print(f"waiting for kafka consumer: {e}")
+			logger.error(f"waiting for kafka consumer: {e}")
 			time.sleep(5)

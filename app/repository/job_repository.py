@@ -3,6 +3,8 @@ from app.models.job import Job, JobStatus
 from app.repository.base_repository import BaseRepository
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
+from app.monitoring.metrics import Metrics
+from app.logging.logger import logger
 
 
 class JobRepository:
@@ -35,32 +37,32 @@ class JobRepository:
 
 	# fetching due jobs for the scheduler to dispatch
 	# combines get_due_jobs() and mark_queued()
-	def claim_due_jobs(self, limit = 100):
-		print(datetime.utcnow())
+	def claim_due_jobs(self, limit = 20):
+		logger.warning(datetime.utcnow())
 		# locking the rows to avoid duplicate 
-		jobs = (
-				self.db.query(Job)
+		return (self.db.query(Job)
 				.filter(Job.status == JobStatus.PENDING,
 					or_(Job.schedule_time <= datetime.utcnow(),
 						Job.next_retry_at <= datetime.utcnow()) 
 					)
+				# what if leader changes during dispatch (hence lock rows)
 				.with_for_update(skip_locked = True)
 				.limit(limit)
 				.all()
 				)
-		for job in jobs:
-			job.status = JobStatus.QUEUED
-		self.db.commit()
+		# for job in jobs:
+		# 	job.status = JobStatus.QUEUED
+		# self.db.commit()
 		return jobs
 
 	# for updating status in app/queue/status_consumer.py
 	def update_status(self, job_id, status):
-		print("updating job status: ", job_id, status)
+		logger.warning("updating job status: ", job_id, status)
 		job = self.get(job_id)
 		if job:
 			job.status = status
 			self.db.commit()
-			print("db changes committed")
+			logger.info("db changes committed")
 
 	def get_pending(self):
 		return (self.db.query(Job)
@@ -89,6 +91,7 @@ class JobRepository:
 			job.worker_id = None
 			job.next_retry_at = datetime.utcnow()
 			job.retry_count += 1
+			Metrics.increment("retries")
 		
 		self.db.commit()
 		return jobs

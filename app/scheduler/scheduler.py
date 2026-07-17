@@ -6,6 +6,7 @@ from app.repository.job_repository import JobRepository
 from app.scheduler.dispatcher import Dispatcher
 from app.recovery.worker_monitor import WorkerMonitor
 from app.scheduler.leader import LeaderElection
+from app.logging.logger import logger
 
 
 class Scheduler:
@@ -19,7 +20,7 @@ class Scheduler:
 	def loop(self):
 		LeaderElection.start()
 		while True:
-			print("Polling", datetime.utcnow())
+			logger.info("Polling", datetime.utcnow())
 			db = SessionLocal()
 			try:
 				if not LeaderElection.is_leader:
@@ -27,12 +28,13 @@ class Scheduler:
 					continue
 				WorkerMonitor.recover(db)
 				jobs = JobRepository(db).claim_due_jobs()
-				print("Found jobs: ", len(jobs))
+				logger.info("Found jobs: ", len(jobs))
 				for job in jobs:
-					print(job.id, job.status, job.schedule_time)
-					Dispatcher.dispatch(job)
+					logger.info(job.id, job.status, job.schedule_time)
+					# dispatcher should own the transaction
+					Dispatcher.dispatch(db, job)
 			except Exception as e:
-				print(f"Scheduler error: {e}")
+				logger.error(f"Scheduler error: {e}")
 			
 			db.close()
 			time.sleep(self.POLL_INTERVAL)

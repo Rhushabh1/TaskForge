@@ -21,6 +21,10 @@ class Metrics:
 		with cls._lock:
 			setattr(cls, field, getattr(cls, field) + 1)
 
+	@classmethod
+	def decrement(cls, field):
+		with cls._lock:
+			setattr(cls, field, getattr(cls, field) - 1)
 
 	@classmethod
 	def snapshot(cls):

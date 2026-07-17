@@ -61,7 +61,8 @@ thats the work of the worker
 ## TODO:
 - if all worker threads are busy, then remaining jobs sit in memory -> so pause kafka polling until threadpool has free workers (backpressure -> pausing polling upstream to avoid memory overload downstream)
 - remove polling scheduler
-- only one leader scheduler should dispatch jobs at a time
 - base_repository.py is not incorporated in the codebase
 - create a repository factory which rests in app/repository/__init__.py -> not incorporated in the codebase
 - likely move worker heartbeats onto a dedicated kafka topic and process them asynchronously
+- atomic update of scheduler_lock
+- adding workers & schedulers to docker-compose.yml 

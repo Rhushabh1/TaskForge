@@ -1,6 +1,7 @@
 from app.queue.kafka import get_producer
 from app.queue.topics import JOB_EXECUTE
 import uuid
+from app.logging.logger import logger
 
 
 class JobProducer:
@@ -10,7 +11,7 @@ class JobProducer:
 		# - workers may receive same message twice -> hence unique event IDS
 		# attempts -> for retry purposes later
 		producer = get_producer()
-		print(f"publishing to kafka: JOB_EXECUTE")
+		logger.info(f"publishing to kafka: JOB_EXECUTE")
 		producer.send(JOB_EXECUTE,
 						{
 							"event_id": str(uuid.uuid4()),

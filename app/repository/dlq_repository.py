@@ -9,13 +9,9 @@ class DLQRepository:
 
 	# create a new entry with given dlq job object
 	def create(self, dlq_job: DLQJob):
-		print("creating dlq_job", datetime.utcnow())
 		self.db.add(dlq_job)
-		print("before commit", datetime.utcnow())
 		self.db.commit()
-		print("after commit", datetime.utcnow())
 		self.db.refresh(dlq_job)
-		print("id", dlq_job.id, datetime.utcnow())
 		return dlq_job
 
 	# fetch dlq job for dlq_id

@@ -83,3 +83,22 @@ def worker_stats():
 		"running": Metrics.worker_running,
 		"completed": Metrics.worker_completed
 	}
+
+
+@router.get("/system")
+def system(db: Session = Depends(get_db)):
+	return {
+		"workers": {
+			"total": worker_repo.count(),
+			"online": len(worker_repo.get_online()),
+			"offline": len(worker_repo.get_dead_workers(timeout = 0))
+		},
+		"jobs": {
+			"total": job_repo.count(),
+			"pending": len(job_repo.get_pending()),
+			"running": len(job_repo.get_running()),
+			"failed": len(job_repo.get_failed())
+		},
+		"executions": exec_repo.count(),
+		"metrics": Metrics.snapshot()
+	}
