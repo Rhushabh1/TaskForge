@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from app.monitoring.metrics import Metrics
 from app.logging.logger import logger
+from app.cache.job_cache import JobCache
 
 
 class JobRepository:
@@ -20,7 +21,7 @@ class JobRepository:
 
 	# fetch job for job_id
 	def get(self, job_id: int):
-		return self.db.query(Job).filter(Job.id == job_id).first()
+		return  self.db.query(Job).filter(Job.id == job_id).first()
 
 	# fetch all jobs from the db
 	def get_all(self):
@@ -63,6 +64,7 @@ class JobRepository:
 			job.status = status
 			self.db.commit()
 			logger.info("db changes committed")
+			JobCache.invalidate(job.id)
 
 	def get_pending(self):
 		return (self.db.query(Job)
@@ -92,6 +94,7 @@ class JobRepository:
 			job.next_retry_at = datetime.utcnow()
 			job.retry_count += 1
 			Metrics.increment("retries")
+			JobCache.invalidate(job.id)
 		
 		self.db.commit()
 		return jobs

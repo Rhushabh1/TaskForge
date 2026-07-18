@@ -12,7 +12,8 @@ class Metrics:
 	scheduler_dispatches = 0
 	worker_running = 0
 	worker_completed = 0
-
+	cache_hits = 0
+	cache_misses = 0
 
 	# for incrementing any of the fields above
 	# endpoint for metrics update
@@ -37,4 +38,6 @@ class Metrics:
 			"scheduler_dispatches": cls.scheduler_dispatches,
 			"worker_running": cls.worker_running,
 			"worker_completed": cls.worker_completed,
+			"cache_hits": cls.cache_hits,
+			"cache_misses": cls.cache_misses
 		}

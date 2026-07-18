@@ -85,6 +85,17 @@ def worker_stats():
 	}
 
 
+@router.get("/cache")
+def cache():
+	hits = Metrics.cache_hits
+	misses = Metrics.cache_misses
+	return {
+		"hits": hits,
+		"misses": misses,
+		"hit_rate": f"{100*hits/(misses + hits)}%"
+	}
+
+
 @router.get("/system")
 def system(db: Session = Depends(get_db)):
 	return {

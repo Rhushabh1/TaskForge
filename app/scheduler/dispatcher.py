@@ -3,6 +3,7 @@ from app.queue.producer import JobProducer
 from app.models.job import JobStatus
 from app.monitoring.metrics import Metrics
 from app.logging.logger import logger
+from app.cache.job_cache import JobCache
 
 
 class Dispatcher:
@@ -14,3 +15,4 @@ class Dispatcher:
 		JobProducer.publish(job)
 		Metrics.increment("scheduler_dispatches")
 		logger.info(f"dispatched {job.id}")
+		JobCache.invalidate(job.id)

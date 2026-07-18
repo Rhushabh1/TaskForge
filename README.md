@@ -7,7 +7,7 @@ Python
 APIs		- REST & FAST		
 SQL 		- for database
 Kafka 		- for message queues
-Redis 		- for caching
+Redis 		- for caching (repositories should be DB only (persistence), services should own the cache)
 Docker		- to design a webapp multi-container (+ DB, cache, queues)
 Scheduler
 Worker + Executor
@@ -64,5 +64,12 @@ thats the work of the worker
 - base_repository.py is not incorporated in the codebase
 - create a repository factory which rests in app/repository/__init__.py -> not incorporated in the codebase
 - likely move worker heartbeats onto a dedicated kafka topic and process them asynchronously
-- atomic update of scheduler_lock
 - adding workers & schedulers to docker-compose.yml 
+- invalidate JobCache wherever cache becomes stale -> ie, wherever job.status changes
+- scheduler polls pending_jobs from cache as well (update JobCache.get_pending_jobs() -> returns only job.ids)
+- CACHE points -> 
+		GET Job
+		GET Worker
+		Pending Job IDs (in scheduler)
+		Internal Jobs API
+		Internal Worker API

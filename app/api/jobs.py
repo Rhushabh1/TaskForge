@@ -1,3 +1,4 @@
+from app.logging.logger import logger
 # for error handling too
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime
@@ -8,6 +9,7 @@ from app.repository.job_repository import JobRepository
 from app.schemas.job import JobCreate, JobResponse
 # temporary execute API before putting it in scheduler
 from app.execution.factory import ExecutorFactory
+from app.cache.job_cache import JobCache
 
 
 router = APIRouter(prefix = "/jobs", tags = ["Jobs"])
@@ -17,13 +19,14 @@ job_repo = JobRepository(db)
 # depends on successful db session
 @router.post("/", response_model = JobResponse)
 def create_job(request: JobCreate, db: Session = Depends(get_db)):
-	print("API enters", datetime.utcnow())
+	logger.info("API enters")
 	job = Job(name = request.name,
 				command = request.command,
 				job_type = request.job_type,
 				schedule_time = request.schedule_time)
 	job = job_repo.create(job)
-	print("after create API", datetime.utcnow())
+	JobCache.put(job)
+	logger.info("after create API")
 	return job
 
 
@@ -44,6 +47,7 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
 @router.delete("/{job_id}")
 def delete_job(job_id: int, db: Session = Depends(get_db)):
 	deleted = job_repo.delete(job_id)
+	JobCache.invalidate(job_id)
 	if not deleted:
 		raise HTTPException(status_code = 404, detail = f"Job {job_id} not found")
 	return {"message": f"deleted {job_id}"}

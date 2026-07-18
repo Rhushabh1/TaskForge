@@ -6,6 +6,7 @@ from app.repository.dlq_repository import DLQRepository
 from app.retry.service import RetryService
 from app.monitoring.metrics import Metrics
 from app.logging.logger import logger
+from app.cache.job_cache import JobCache
 
 
 # modelled around UnitOfWork -> all DBs should be updated at once via service layer only
@@ -17,11 +18,21 @@ class JobService:
 		self.job_repo = JobRepository(db)
 		self.dlq_repo = DLQRepository(db)
 
+	def get_cached_job(self, job_id):
+		cached = JobCache.get(job_id)
+		if cached:
+			return cached
+		job = self.job_repo.get(job_id)
+		if job:
+			JobCache.put(job)
+		return job
+
 	def handle_execution(self, event):
-		job = self.job_repo.get(event["job_id"])
+		job = self.get_cached_job(event["job_id"])
 		if job is None:
 			return
 
+		JobCache.invalidate(job.id)
 		job.status = event["status"]
 		job.worker_id = event["worker_id"]
 		if job.status == JobStatus.SUCCESS:
