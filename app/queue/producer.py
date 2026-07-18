@@ -1,7 +1,7 @@
 from app.queue.kafka import get_producer
 from app.queue.topics import JOB_EXECUTE
 import uuid
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 
 
 class JobProducer:

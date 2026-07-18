@@ -4,7 +4,7 @@ from app.repository.base_repository import BaseRepository
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from app.monitoring.metrics import Metrics
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 from app.cache.job_cache import JobCache
 
 

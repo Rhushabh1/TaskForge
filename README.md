@@ -12,7 +12,7 @@ Docker		- to design a webapp multi-container (+ DB, cache, queues)
 Scheduler
 Worker + Executor
 Retries + Dead letter queues
-Metrics loggings
+Metrics loggings -> human json endpoint + prometheus' openmetrics format
 
 
 ## How to Run:
@@ -27,12 +27,14 @@ $> docker compose exec api python -m app.queue.status_consumer
 - visit http://localhost:8000/docs -> for Swagger UI
 - visit http://localhost:8000 -> for verifying successful message
 - visit http://localhost:8000/health -> for health of API
+- visit http://localhost:8000/metrics -> for prometheus monitoring
 
 - to shutdown everything
 $> docker compose down -v
 
 for inspecting TaskForge DB
 $>  docker exec -it taskforge-db psql -U TaskForge -d TaskForge
+
 
 ## Docker build issue
 when the docker build fails after "docker compose up --build"
@@ -66,10 +68,13 @@ thats the work of the worker
 - likely move worker heartbeats onto a dedicated kafka topic and process them asynchronously
 - adding workers & schedulers to docker-compose.yml 
 - invalidate JobCache wherever cache becomes stale -> ie, wherever job.status changes
-- scheduler polls pending_jobs from cache as well (update JobCache.get_pending_jobs() -> returns only job.ids)
 - CACHE points -> 
 		GET Job
 		GET Worker
 		Pending Job IDs (in scheduler)
 		Internal Jobs API
 		Internal Worker API
+- introduce a service layer -> APIs shouldn't directly talk to repositories
+- use alembic for database migrations instead of Base.metadata.create_all()
+- centralise config (kafka, redis, db, metrics) into single Settings class
+- make kafka publish asynchronously -> so APIs don't block on flush()

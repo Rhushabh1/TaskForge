@@ -9,11 +9,11 @@ from app.execution.factory import ExecutorFactory
 from app.worker.status_publisher import StatusPublisher
 from app.models.job import JobStatus
 from app.monitoring.metrics import Metrics
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 
 
 def execute_job(message, worker_id):
-	logger.info("executing jobs: ", message)
+	logger.info("worker %s: executing jobs: %s", worker_id, message)
 
 	# connect to execution db
 	db = SessionLocal()
@@ -45,8 +45,9 @@ def execute_job(message, worker_id):
 		# no need to pass result to publisher -> result is not updated in Job table
 		Metrics.increment("jobs_completed")
 		StatusPublisher.publish(message["job_id"], JobStatus.SUCCESS, worker_id)
+		logger.error("worker %s: execution job: %s: success", worker_id, message["job_id"])
 	except Exception as e:
-		logger.error("worker error: ", str(e))
+		logger.error("worker %s: execution job: %s: error: %s", worker_id, message["job_id"], str(e))
 		# update Execution table
 		execution = Execution(job_id = message["job_id"],
 							attempt = message["attempt"],

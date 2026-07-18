@@ -1,6 +1,6 @@
 from app.queue.kafka import create_consumer
 from app.queue.topics import JOB_EXECUTE
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 
 
 logger.info("creating consumer")

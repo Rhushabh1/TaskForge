@@ -3,7 +3,7 @@ from app.queue.topics import JOB_STATUS
 from app.db.database import SessionLocal
 from app.repository.job_repository import JobRepository 
 from app.services.job_service import JobService
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 
 
 logger.info("creating status listener")

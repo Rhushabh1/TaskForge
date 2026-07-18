@@ -9,7 +9,7 @@ from app.queue.kafka import create_consumer
 from app.queue.topics import JOB_EXECUTE
 from app.worker.task import execute_job
 from app.repository.worker import WorkerRepository
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 
 
 HEARTBEAT_CHECK = 10
@@ -39,16 +39,16 @@ def start():
 	# 4 - send heartbeats
 	# 5 - register worker (TODO)
 	# 6 - shutdown gracefully (TODO)
-	logger.info(f"starting worker: {WORKER_NAME}")
+	logger.info("starting worker: %s", WORKER_NAME)
 	threading.Thread(target = heartbeat_loop,
 					daemon = True
 					).start()
 	consumer = create_consumer(JOB_EXECUTE)
-	logger.info(f"listening on topic: {JOB_EXECUTE}")
+	logger.info("worker %s: listening on topic: %s", WORKER_NAME, JOB_EXECUTE)
 	for message in consumer:
 		# each kafka message becomes one thread (max 4)
 		# runs execute_job(message.value)
-		logger.info(f"received: {message.value}")
+		logger.info("worker %s: received: %s", WORKER_NAME, message.value)
 		executor.submit(execute_job, message.value, WORKER_ID)
 
 

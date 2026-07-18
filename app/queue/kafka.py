@@ -1,7 +1,7 @@
 from kafka import KafkaProducer, KafkaConsumer
 import json
 import time
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 
 
 _producer = None

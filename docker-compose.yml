@@ -48,5 +48,13 @@ services:
     ports: 
       - "6379:6379"
 
+  prometheus:
+    image: prom/prometheus
+    container_name: taskforge-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
 volumes:
   postgres-data:

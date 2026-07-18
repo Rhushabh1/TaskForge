@@ -1,4 +1,4 @@
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 # for error handling too
 from fastapi import APIRouter, Depends, HTTPException
 from datetime import datetime

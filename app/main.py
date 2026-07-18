@@ -6,6 +6,8 @@ import app.models
 from app.scheduler.scheduler import Scheduler
 # since scheduler starts before fastapi startup finishes
 from contextlib import asynccontextmanager
+from prometheus_client import make_asgi_app
+from app.monitoring.middleware import MetricsMiddleware
 
 
 Base.metadata.create_all(bind = engine)
@@ -31,6 +33,12 @@ app = FastAPI(
 
 app.include_router(health_router)
 app.include_router(job_router)
+
+
+# for prometheus monitoring
+app.add_middleware(MetricsMiddleware)
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
 
 
 @app.get("/")

@@ -5,7 +5,7 @@ from app.repository.job_repository import JobRepository
 from app.repository.dlq_repository import DLQRepository 
 from app.retry.service import RetryService
 from app.monitoring.metrics import Metrics
-from app.logging.logger import logger
+from app.monitoring.logger import logger
 from app.cache.job_cache import JobCache
 
 
@@ -47,7 +47,7 @@ class JobService:
 							reason = event["output"])
 				self.dlq_repo.create(dlq)
 				Metrics.increment("dead_letter_jobs")
-				logger.info("created dlq entry", datetime.utcnow())
+				logger.info("created dlq entry: %s", job.id)
 			else:
 				Metrics.increment("retries")
 		self.db.commit()
