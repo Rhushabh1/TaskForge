@@ -18,46 +18,53 @@ from app.monitoring.metrics import Metrics
 
 router = APIRouter(prefix = "/internal",
 					tags = ["Internal Monitoring"])
-job_repo = JobRepository(db)
-worker_repo = WorkerRepository(db)
-exec_repo = ExecutionRepository(db)
-dlq_repo = DLQRepository(db)
-event_repo = EventRepository(db)
-lock_repo = SchedulerLockRepository(db)
+# job_repo = JobRepository(db)
+# worker_repo = WorkerRepository(db)
+# exec_repo = ExecutionRepository(db)
+# dlq_repo = DLQRepository(db)
+# event_repo = EventRepository(db)
+# lock_repo = SchedulerLockRepository(db)
 
 
 @router.get("/workers")
 def workers(db: Session = Depends(get_db)):
+	worker_repo = WorkerRepository(db)
 	return worker_repo.get_all()
 
 
 @router.get("/jobs")
 def jobs(db: Session = Depends(get_db)):
+	job_repo = JobRepository(db)
 	return job_repo.get_all()
 
 
 @router.get("/jobs/pending")
 def pending_jobs(db: Session = Depends(get_db)):
+	job_repo = JobRepository(db)
 	return job_repo.get_pending()
 
 
 @router.get("/executions")
 def executions(db: Session = Depends(get_db)):
+	exec_repo = ExecutionRepository(db)
 	return exec_repo.latest()
 
 
 @router.get("/executions/failed")
 def failed_exec(db: Session = Depends(get_db)):
+	exec_repo = ExecutionRepository(db)
 	return exec_repo.failed()
 
 
 @router.get("/dlq")
 def dlq(db: Session = Depends(get_db)):
+	dlq_repo = DLQRepository(db)
 	return dlq_repo.get_all()
 
 
 @router.get("/events")
 def events(db: Session = Depends(get_db)):
+	event_repo = EventRepository(db)
 	return event_repo.latest()
 
 
@@ -72,7 +79,8 @@ def kafka_topics():
 
 
 @router.get("/scheduler")
-def scheduler():
+def scheduler(db: Session = Depends(get_db)):
+	lock_repo = SchedulerLockRepository(db)
 	return {"jobs_dispatched": Metrics.scheduler_dispatches,
 			"leader": lock_repo.leader()}
 
@@ -98,6 +106,9 @@ def cache():
 
 @router.get("/system")
 def system(db: Session = Depends(get_db)):
+	job_repo = JobRepository(db)
+	worker_repo = WorkerRepository(db)
+	exec_repo = ExecutionRepository(db)
 	return {
 		"workers": {
 			"total": worker_repo.count(),

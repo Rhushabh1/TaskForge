@@ -33,6 +33,9 @@ class Job(Base):
 						ForeignKey("workers.id"),
 						nullable = True,
 						default = None)
+	user_id = Column(Integer, ,
+					ForeignKey("users.id"),
+					nullable = True)
 	# will add retry later
 	max_retries = Column(Integer,
 						default = 3,

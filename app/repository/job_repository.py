@@ -6,6 +6,7 @@ from sqlalchemy import or_
 from app.monitoring.metrics import Metrics
 from app.monitoring.logger import logger
 from app.cache.job_cache import JobCache
+from app.models.user import Roles
 
 
 class JobRepository:
@@ -24,8 +25,13 @@ class JobRepository:
 		return  self.db.query(Job).filter(Job.id == job_id).first()
 
 	# fetch all jobs from the db
-	def get_all(self):
-		return self.db.query(Job).all()
+	def get_all(self, user):
+		if user["role"] == Roles.ADMIN:
+			return self.db.query(Job).all()
+
+		return (self.db.query(Job)
+				.filter(Job.user_id == int(user["sub"]))
+				.all())
 
 	def delete(self, job_id: int):
 		job = self.get(job_id)

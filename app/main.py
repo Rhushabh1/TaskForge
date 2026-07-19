@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from app.api.health import router as health_router
 from app.api.jobs import router as job_router
+from app.api.auth import router as auth_router
+from app.api.internal import router as internal_router
+
 from app.db.database import Base, engine
 import app.models
 from app.scheduler.scheduler import Scheduler
@@ -33,6 +36,8 @@ app = FastAPI(
 
 app.include_router(health_router)
 app.include_router(job_router)
+app.include_router(auth_router)
+app.include_router(internal_router)
 
 
 # for prometheus monitoring
