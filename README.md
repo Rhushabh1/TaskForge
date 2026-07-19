@@ -78,3 +78,4 @@ thats the work of the worker
 - use alembic for database migrations instead of Base.metadata.create_all()
 - centralise config (kafka, redis, db, metrics) into single Settings class
 - make kafka publish asynchronously -> so APIs don't block on flush()
+- delete app/logging/logger.py -> shift to app/monitoring/logger.py

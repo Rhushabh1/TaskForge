@@ -1,11 +1,17 @@
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.user import *
 from app.models.user import User
 from app.repository.user_repository import UserRepository 
+from app.repository.refresh_token_repository import RefreshTokenRepository 
+from app.auth.jwt import create_token
 from app.auth.hashing imoprt hash_password
 from app.auth.service import AuthService
+from app.monitoring.logger import logger
+from app.auth.dependencies import get_current_user
+
 
 router = APIRouter(prefix = "/auth",
 					tags = ["Authentication"])
@@ -25,9 +31,39 @@ def register(request: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model = TokenResponse)
 def login(request: LoginRequest, db: Session = Depends(get_db)):
+	logger.info("user = %s login", request.username)
 	token = AuthService.authenticate(db, request.username, request.password)
 	if token is None:
 		raise HTTPException(401, "Invalid credentials")
 
 	return {"access_token": token,
 			"token_type": "bearer"}
+
+
+@router.post("/refresh")
+def refresh(request: RefreshRequest, db: Session = Depends(get_db)):
+	refresh_repo = RefreshTokenRepository(db)
+	token = refresh_repo.get_token(request.refresh_token)
+	if token is None:
+		raise HTTPException(401, "Invalid refresh token")
+
+	if token.expires_at < datetime.utcnow():
+		refresh_repo.revoke(request.refresh_token)
+		raise HTTPException(401, "Refresh expired")
+
+	logger.info("refresh token user = %s", token.user_id)
+	user = UserRepository(db).get(token.user_id)
+	acces = create_token(user)
+	return {"access_token": access,
+			"token_type": "bearer"}
+
+
+@router.post("/logout")
+def logout(request: RefreshRequest, db: Session = Depends(get_db), user = Depends(get_current_user)):
+	logger.info("logout user = %s", int(user["sub"]))
+	RefreshTokenRepository(db).revoke(request.refresh_token)
+	return {"message": "Logged out"}
+
+
+# if user deleted
+# RefreshTokenRepository(db).revoke_user(user.id)

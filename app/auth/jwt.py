@@ -1,11 +1,13 @@
 import os 
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
+import secrets
 
 
 SECRET = os.getenv("JWT_SECRET", "taskforge-secret")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 EXPIRE_MINUTES = int(os.getenv("JWT_EXPIRES", 15))
+REFRESH_DAYS = 7
 
 
 def create_token(user):
@@ -23,3 +25,7 @@ def decode(token):
 		return jwt.decode(token, SECRET, algorithms = [ALGORITHM])
 	except JWTError:
 		return None
+
+
+def create_refresh_token():
+	return secrets.token_urlsafe(64)
